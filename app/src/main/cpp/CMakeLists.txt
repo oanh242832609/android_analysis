@@ -77,6 +77,7 @@ target_link_libraries(
         ${log-lib}
 )
 
-#add_subdirectory(sniffer)
+add_subdirectory(sniffer)
+add_subdirectory(hook_ssl)
 #add_subdirectory(sqllite)
 #add_subdirectory(republic)

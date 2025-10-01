@@ -1,8 +1,5 @@
 #include "../third/utils/log.h"
 #include "../third/utils/linux_helper.h"
-#include "../third/tinyxml2/tinyxml2.h"
-
-using namespace tinyxml2;
 
 bool system_status(int status) {
     if (status == -1)

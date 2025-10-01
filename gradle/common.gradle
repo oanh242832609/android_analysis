@@ -66,12 +66,15 @@ def decompressDir(String srcPath, String destPath) throws Exception {
 
 def isDebug() {
     def taskName = gradle.getStartParameter().taskNames.find { taskName ->
-        return taskName.contains("assemble") && taskName.contains("app")
+        return (taskName.contains("assemble") && taskName.contains("app")) || 
+               (taskName.contains("build") && taskName.contains("app")) ||
+               taskName.contains("frida_helper")
     }
     if (taskName == null) {
         return -1
     }
-    return taskName.contains("Debug") ? 1 : 0
+    // Default to debug mode unless explicitly release
+    return taskName.contains("Release") ? 0 : 1
 }
 
 def buildDex(String name) {

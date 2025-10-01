@@ -2,6 +2,7 @@ package com.android.analyse.hook;
 
 
 import android.app.Application;
+import android.util.Log;
 
 import com.android.analyse.hook.system_service.SettingsProvider;
 import com.common.log;
@@ -10,6 +11,7 @@ import com.common.tools.hooker.WhenHook;
 import java.io.File;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class AnalyseHook implements IXposedHookLoadPackage {

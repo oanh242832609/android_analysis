@@ -28,12 +28,6 @@ static bool CheckAllowModule(const vector<Stack> &frame, const string &str) {
     return false;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_android_analyse_hook_Native_initNative(JNIEnv *env, jclass clazz, jstring pkg_name) {
-    setPkgName(lsplant::JUTFString(env, pkg_name).get());
-    LOGI("analyse inject pid: %d, %s", getpid(), getPkgName().c_str());
-}
 
 
 module_info_t info;
@@ -66,7 +60,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
                                                        trace->runTraceCode(address,
                                                                            (void *) (
                                                                                    (uint64_t) info.module_address +
-                                                                                   0x1061C), ctx);
+                                                                                   0x1061C), ctx, Code);
                                                    });
                                        });
                    });

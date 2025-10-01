@@ -1,0 +1,14 @@
+{
+    "java.project.sourcePaths": [
+        "app/src/main/cpp/trace",
+        "app/src/main/cpp/third",
+        "app/src/main/cpp/static_lib",
+        "app/src/main/cpp/sqllite",
+        "app/src/main/cpp/sniffer",
+        "app/src/main/cpp/republic",
+        "app/src/main/cpp/jni_trace",
+        "app/src/main/cpp/hook_ssl",
+        "app/src/main/cpp/unused"
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

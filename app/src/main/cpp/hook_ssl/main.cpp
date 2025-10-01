@@ -4,8 +4,10 @@
 #include <jni.h>
 #include <string.h>
 
-#include "../utils/log.h"
-#include "../dobby/include/dobby.h"
+#include "../third/utils/log.h"
+#include "../third/utils/jni_helper.hpp"
+#include "../third/byopen/hack_dlopen.h"
+#include "../third/dobby/include/dobby.h"
 
 using namespace std;
 
@@ -67,26 +69,28 @@ void hook_ssl(const char *path) {
     string lp = "/storage/emulated/0/Android/data/" + packet_name + "/ssl.log";
     ssl_key_log_file = new file_writer(lp.c_str(), "a+");
 
-    auto elf = fake_dlopen(path, 0);
+    auto elf = hack_dlopen(path, 0);
     if (elf == nullptr) {
         logd("dlopen error: %s", path);
         return;
     }
-    void *pSSL_CTX_new = fake_dlsym(elf, "SSL_CTX_new");
+    void *pSSL_CTX_new = hack_dlsym(elf, "SSL_CTX_new");
     if (pSSL_CTX_new == nullptr) {
+        hack_dlclose(elf);
         return;
     }
     logd("find SSL_CTX_new: %s", path);
     SSL_CTX_set_keylog_callback = (void (*)(void *ctx,
-                                            SSL_CTX_keylog_cb_func cb)) fake_dlsym(elf,
+                                            SSL_CTX_keylog_cb_func cb)) hack_dlsym(elf,
                                                                                    "SSL_CTX_set_keylog_callback");
     if (SSL_CTX_set_keylog_callback == nullptr) {
+        hack_dlclose(elf);
         return;
     }
     logd("find SSL_CTX_set_keylog_callback: %s", path);
     DobbyHook((void *) pSSL_CTX_new, (dobby_dummy_func_t) hook_SSL_CTX_new,
               (dobby_dummy_func_t *) &SSL_CTX_new);
-    fake_dlclose(elf);
+    hack_dlclose(elf);
 }
 
 bool do_hook(const char *path) {
@@ -110,23 +114,23 @@ void *hook_android_dlopen_ext(const char *filename, int flags, const void *extin
 
 extern "C"
 JNIEXPORT void unsslpinning(char *log) {
-    fake_enumerate_module(do_hook);
+    // fake_enumerate_module(do_hook); // Function not implemented
 }
 
 extern "C"
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    log::set_adapt(log_adapt::use_adb);
+    init_log("ssl2", new xbyl::adapter_adb());
     logd("onload in!");
     JNIEnv *env;
     vm->GetEnv((void **) (&env), JNI_VERSION_1_4);
     if (env != nullptr) {
         jstring pkn = get_package_name(env);
         if (pkn != nullptr) {
-            packet_name = jstring2str(env, pkn);
+            packet_name = jstring2string(env, pkn);
         } else {
             loge("get package name error!");
         }
-        fake_enumerate_module(do_hook);
+        // fake_enumerate_module(do_hook); // Function not implemented
     } else {
         loge("get env error!");
     }

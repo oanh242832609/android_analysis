@@ -1,28 +1,31 @@
 cmake_minimum_required(VERSION 3.10.2)
-project("sniffer")
-
+project("ssl2")
 
 find_library(
         log-lib
         log)
 
-file(GLOB sniffer_src
+file(GLOB ssl_src
         "./*.cpp"
         "./*.h"
         "../third/utils/log.h"
         "../third/utils/log.cpp"
         "../third/utils/utils.h"
         "../third/utils/utils.cpp"
+        "../third/dobby/include/dobby.h"
         )
 
-add_executable(
-        sniffer
-        ${sniffer_src})
+add_library(
+        ssl2
+        SHARED
+        ${ssl_src})
 
 target_link_libraries(
-        sniffer
+        ssl2
         libutils
+        libbyopen
+        dobby
         ${log-lib})
 
-set_target_properties(sniffer PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+set_target_properties(ssl2 PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../libs/${ANDROID_ABI}")

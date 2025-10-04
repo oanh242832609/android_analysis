@@ -25,12 +25,8 @@ static bool CheckAllowModule(const vector<Stack> &frame, const string &str) {
     return false;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_android_analyse_hook_Native_initNative(JNIEnv *env, jclass clazz, jstring pkg_name) {
-    setPkgName(lsplant::JUTFString(env, pkg_name).get());
-    LOGI("analyse inject pid: %d, %s", getpid(), getPkgName().c_str());
-}
+// Removed duplicate function Java_com_android_analyse_hook_Native_initNative
+// This function is already defined in jni.cpp
 
 module_info_t info;
 

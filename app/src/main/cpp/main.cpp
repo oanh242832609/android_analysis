@@ -9,14 +9,12 @@
 #include "base/when_hook.h"
 #include "base/hook.h"
 #include "trace/vm.h"
-
 #include "third/dobby/include/dobby.h"
-
 
 extern "C" JNIEXPORT void JNICALL
 init_jni_hook(JNIEnv *env, const char *pkg_name);
 
-static bool CheckAllowModule(const vector<Stack> &frame, const string &str) {
+static bool CheckAllowModule(const vector<stack> &frame, const string &str) {
     for (const auto &item: frame) {
         if (item.name.find(str) != -1) {
             return true;
@@ -34,7 +32,6 @@ Java_com_android_analyse_hook_Native_initNative(JNIEnv *env, jclass clazz, jstri
     setPkgName(lsplant::JUTFString(env, pkg_name).get());
     LOGI("analyse inject pid: %d, %s", getpid(), getPkgName().c_str());
 }
-
 
 module_info_t info;
 
@@ -66,7 +63,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
                                                        trace->runTraceCode(address,
                                                                            (void *) (
                                                                                    (uint64_t) info.module_address +
-                                                                                   0x1061C), ctx);
+                                                                                   0x1061C), ctx, TraceType::Code);
                                                    });
                                        });
                    });
@@ -88,7 +85,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 //                   });
     return JNI_VERSION_1_6;
 }
-
 
 ////
 //DefineHookStub(waitpid, pid_t, pid_t pid, int *status, int options) {

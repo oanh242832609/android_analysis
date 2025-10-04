@@ -10,11 +10,10 @@
 #include "base/hook.h"
 #include "trace/vm.h"
 #include "third/dobby/include/dobby.h"
-
 extern "C" JNIEXPORT void JNICALL
 init_jni_hook(JNIEnv *env, const char *pkg_name);
 
-static bool CheckAllowModule(const vector<stack> &frame, const string &str) {
+static bool CheckAllowModule(const vector<Stack> &frame, const string &str) {
     for (const auto &item: frame) {
         if (item.name.find(str) != -1) {
             return true;
@@ -83,6 +82,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 ////                                    test_qbdi(address, ctx);
 //                               });
 //                   });
+
     return JNI_VERSION_1_6;
 }
 

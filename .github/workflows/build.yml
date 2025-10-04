@@ -1,0 +1,80 @@
+name: Build Android Project with NDK
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Install NDK
+      run: |
+        echo "y" | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;25.2.9519653"
+        echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/25.2.9519653" >> $GITHUB_ENV
+        echo "NDK_HOME=${ANDROID_HOME}/ndk/25.2.9519653" >> $GITHUB_ENV
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build with Gradle (Debug)
+      run: ./gradlew assembleDebug --stacktrace
+      
+    - name: Collect build artifacts
+      run: |
+        mkdir -p artifacts/so_files
+        mkdir -p artifacts/js_files
+        mkdir -p artifacts/apk
+        
+        # Copy all .so files from app/libs directories
+        echo "Copying .so files..."
+        find app/libs -name "*.so" -type f -exec cp {} artifacts/so_files/ \; 2>/dev/null || true
+        
+        # Copy all .so files from build outputs
+        find app/build -name "*.so" -type f -exec cp {} artifacts/so_files/ \; 2>/dev/null || true
+        
+        # Copy JavaScript files from frida directory
+        echo "Copying JavaScript files..."
+        find frida -name "*.js" -type f -exec cp --parents {} artifacts/js_files/ \; 2>/dev/null || true
+        find frida_helper -name "*.js" -type f -exec cp --parents {} artifacts/js_files/ \; 2>/dev/null || true
+        
+        # Copy APK files
+        echo "Copying APK files..."
+        find app/build/outputs/apk -name "*.apk" -type f -exec cp {} artifacts/apk/ \; 2>/dev/null || true
+        
+        # List what was collected
+        echo "=== Collected artifacts ==="
+        echo "SO files:"
+        ls -lah artifacts/so_files/ || echo "No .so files found"
+        echo "JS files:"
+        find artifacts/js_files/ -type f || echo "No .js files found"
+        echo "APK files:"
+        ls -lah artifacts/apk/ || echo "No .apk files found"
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-analysis-build-artifacts
+        path: |
+          artifacts/**/*
+          app/libs/**/*.so
+          frida/**/*.js
+          frida_helper/**/*.js
+        retention-days: 30
+        if-no-files-found: warn

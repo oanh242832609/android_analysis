@@ -1,20 +1,18 @@
 package com.android.analyse.hook;
-
-
 import android.app.Application;
-
+import android.util.Log;
 import com.android.analyse.hook.system_service.SettingsProvider;
 import com.common.log;
 import com.common.tools.hooker.WhenHook;
-
 import java.io.File;
-
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class AnalyseHook implements IXposedHookLoadPackage {
     static boolean hadHook = false;
     static int idx = 0;
+
     void findJniNative(ClassLoader classLoader) {
         try {
             Native.find_jni_native_addr(new Class[]{XposedHelpers.findClass("m41739d0d", classLoader)});
@@ -22,6 +20,7 @@ public class AnalyseHook implements IXposedHookLoadPackage {
             log.e("findJniNative " + e);
         }
     }
+
     void InjectApp(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         try {
             new File("/sdcard/Android/data/" + lpparam.packageName).mkdir();
@@ -42,15 +41,16 @@ public class AnalyseHook implements IXposedHookLoadPackage {
                     log.e("hook context error: " + e);
                 }
             }
+
             @Override
             public void OnHookAfter(Application application) {
             }
         });
-
 //        ActivityTaskManagerService.Hook(lpparam);
 //        HookLog.Init(lpparam);
 //        DexDump.HookDump2Dex(lpparam, "/data/data/com.global.frxx");
     }
+
     void InjectSystem(XC_LoadPackage.LoadPackageParam lpparam) {
         WhenHook.WhenDexLoaded.When(new WhenHook.WhenDexLoadedCallback() {
             @Override
@@ -71,6 +71,7 @@ public class AnalyseHook implements IXposedHookLoadPackage {
             log.e("hook setting error: " + e);
         }
     }
+
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         if (lpparam.packageName != null &&
